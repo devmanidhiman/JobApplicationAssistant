@@ -1,0 +1,19 @@
+Core/
+  Models/
+    Pipeline/
+      PipelineRequest.cs        ← input to the whole pipeline
+      PipelineResult.cs         ← final output (all 4 steps combined)
+      SkillExtractionResult.cs  ← output of Step 1 specifically
+  Services/
+    PipelineOrchestrator.cs     ← coordinates steps, calls each service
+  Interfaces/
+    IPipelineOrchestrator.cs
+    ISkillExtractionService.cs
+
+Infrastructure/
+  Pipeline/
+    SkillExtractionService.cs   ← calls Claude, parses JSON response
+
+API/
+  Controllers/
+    JobApplicationController.cs ← add new endpoint on top of existing ping

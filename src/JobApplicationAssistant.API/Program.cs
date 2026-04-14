@@ -1,7 +1,10 @@
 // src/JobApplicationAssistant.API/Program.cs
 using Anthropic;
+using JobApplicationAssistant.Core;
 using JobApplicationAssistant.Core.Interfaces;
+using JobApplicationAssistant.Core.Models.Pipeline;
 using JobApplicationAssistant.Infrastructure.Claude;
+using JobApplicationAssistant.Infrastructure.Pipeline;
 using Serilog;
 
 
@@ -32,6 +35,8 @@ builder.Services.AddSingleton<AnthropicClient>(_ =>
 
 // Register our abstraction
 builder.Services.AddScoped<IClaudeService, ClaudeService>();
+builder.Services.AddScoped<ISkillExtractionService, SkillExtractionService>();
+builder.Services.AddScoped<IPipelineOrchestrator, PipelineOrchestrator>();
 
 builder.Host.UseSerilog();
 var app = builder.Build();
