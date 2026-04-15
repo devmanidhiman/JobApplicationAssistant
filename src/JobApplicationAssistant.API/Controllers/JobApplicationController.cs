@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Http;
 using JobApplicationAssistant.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using JobApplicationAssistant.Core.Models.Pipeline;
+using JobApplicationAssistant.Core;
+using System.IO.Pipelines;
 
 namespace JobApplicationAssistant.API.Controllers;
 
@@ -9,10 +12,12 @@ namespace JobApplicationAssistant.API.Controllers;
 public class JobApplicationController : ControllerBase
 {
     private readonly IClaudeService _claudeService;
+    private readonly IPipelineOrchestrator _pipelineOrchestrator;
 
-    public JobApplicationController(IClaudeService claudeService)
+    public JobApplicationController(IClaudeService claudeService, IPipelineOrchestrator pipelineOrchestrator)
     {
         _claudeService = claudeService;
+        _pipelineOrchestrator = pipelineOrchestrator;
     }
 
     [HttpPost("ping")]
@@ -25,6 +30,13 @@ public class JobApplicationController : ControllerBase
         );
 
         return Ok(new { response });
+    }
+
+    [HttpPost("analyze")]
+    public async Task<IActionResult> Analyze([FromBody] PipelineRequest request, CancellationToken cancellationToken)
+    {
+        var response = await _pipelineOrchestrator.RunAsync(request, cancellationToken);
+        return Ok(response);
     }
 }
 
