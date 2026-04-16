@@ -2,6 +2,7 @@ using JobApplicationAssistant.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using JobApplicationAssistant.Core.Models.Pipeline;
 using System.Text.Json;
+using JobApplicationAssistant.Infrastructure.Common;
 
 namespace JobApplicationAssistant.Infrastructure.Pipeline;
 
@@ -43,10 +44,11 @@ public class SkillExtractionService : ISkillExtractionService
         var rawResponse = await _claudeService.CompleteAsync(systemPrompt, userMessage, cancellationToken);
 
         _logger.LogInformation("Raw Claude Response: {Response}", rawResponse);
+        var cleanedResponse = JsonHelper.StripMarkdownFences(rawResponse);
 
         try
         {
-            var result = JsonSerializer.Deserialize<SkillExtractionResult>(rawResponse, new JsonSerializerOptions
+            var result = JsonSerializer.Deserialize<SkillExtractionResult>(cleanedResponse, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });

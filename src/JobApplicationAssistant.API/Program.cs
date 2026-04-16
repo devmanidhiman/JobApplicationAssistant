@@ -37,6 +37,7 @@ builder.Services.AddSingleton<AnthropicClient>(_ =>
 builder.Services.AddScoped<IClaudeService, ClaudeService>();
 builder.Services.AddScoped<ISkillExtractionService, SkillExtractionService>();
 builder.Services.AddScoped<IResumeMatchService, ResumeMatchService>();
+builder.Services.AddScoped<IResumeRewriteService, ResumeRewriteService>();
 builder.Services.AddScoped<IPipelineOrchestrator, PipelineOrchestrator>();
 
 builder.Host.UseSerilog();

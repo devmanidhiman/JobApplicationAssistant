@@ -9,13 +9,16 @@ public class PipelineOrchestrator: IPipelineOrchestrator
     private readonly ILogger<PipelineOrchestrator> _logger;
     private readonly ISkillExtractionService _skillExtractionService;
     private readonly IResumeMatchService _resumeMatchService;
+    private readonly IResumeRewriteService _resumeRewriteService;
 
     public PipelineOrchestrator (ISkillExtractionService skillExtractionService, 
-                                IResumeMatchService resumeMatchService, 
+                                IResumeMatchService resumeMatchService,
+                                IResumeRewriteService resumeRewriteService, 
                                 ILogger<PipelineOrchestrator> logger)
     {
         _skillExtractionService = skillExtractionService;
         _resumeMatchService = resumeMatchService;
+        _resumeRewriteService = resumeRewriteService;
         _logger = logger;
     }
 
@@ -41,7 +44,17 @@ public class PipelineOrchestrator: IPipelineOrchestrator
             result.ResumeMatch.MatchScore,
             result.ResumeMatch.MissingSkills.Count);
 
-        // Steps 3 and 4 will be added here
+        //Step 3: Resume Rewriting
+        result.ResumeRewrite = await _resumeRewriteService.RewriteAsync(result.SkillExtraction,
+                                        request.ResumeText,
+                                        cancellationToken);
+        
+        _logger.LogInformation("Step 3 complete. Rewritten bullets: {Count}",
+            result.ResumeRewrite.RewrittenBullets.Count);
+
+        // Step 4 will be added here
+
+        _logger.LogInformation("Pipeline complete");
 
         return result;
     }

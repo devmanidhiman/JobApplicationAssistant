@@ -3,6 +3,7 @@ using System.Text.Json;
 using JobApplicationAssistant.Core;
 using JobApplicationAssistant.Core.Interfaces;
 using JobApplicationAssistant.Core.Models.Pipeline;
+using JobApplicationAssistant.Infrastructure.Common;
 using Microsoft.Extensions.Logging;
 
 namespace JobApplicationAssistant.Infrastructure.Pipeline;
@@ -51,10 +52,11 @@ public class ResumeMatchService : IResumeMatchService
         var rawResponse = await _claudeService.CompleteAsync(systemPrompt, userMessage, cancellationToken);
 
         _logger.LogInformation("Raw Claude response: {Response}", rawResponse);
+        var cleanedResponse = JsonHelper.StripMarkdownFences(rawResponse);
 
         try
         {
-            var result = JsonSerializer.Deserialize<ResumeMatchResult>(rawResponse, new JsonSerializerOptions
+            var result = JsonSerializer.Deserialize<ResumeMatchResult>(cleanedResponse, new JsonSerializerOptions
             {
                PropertyNameCaseInsensitive = true 
             });
