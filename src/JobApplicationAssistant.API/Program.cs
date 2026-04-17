@@ -24,7 +24,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Register Anthropic client — reads ANTHROPIC_API_KEY from environment automatically
 builder.Services.AddSingleton<AnthropicClient>(_ =>
 {
     var apiKey = builder.Configuration["ANTHROPIC_API_KEY"]
@@ -38,6 +37,7 @@ builder.Services.AddScoped<IClaudeService, ClaudeService>();
 builder.Services.AddScoped<ISkillExtractionService, SkillExtractionService>();
 builder.Services.AddScoped<IResumeMatchService, ResumeMatchService>();
 builder.Services.AddScoped<IResumeRewriteService, ResumeRewriteService>();
+builder.Services.AddScoped<ICoverLetterService, CoverLetterService>();
 builder.Services.AddScoped<IPipelineOrchestrator, PipelineOrchestrator>();
 
 builder.Host.UseSerilog();

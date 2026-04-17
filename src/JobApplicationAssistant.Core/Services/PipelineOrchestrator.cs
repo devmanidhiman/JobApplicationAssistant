@@ -10,15 +10,18 @@ public class PipelineOrchestrator: IPipelineOrchestrator
     private readonly ISkillExtractionService _skillExtractionService;
     private readonly IResumeMatchService _resumeMatchService;
     private readonly IResumeRewriteService _resumeRewriteService;
+    private readonly ICoverLetterService _coverLetterService;
 
     public PipelineOrchestrator (ISkillExtractionService skillExtractionService, 
                                 IResumeMatchService resumeMatchService,
-                                IResumeRewriteService resumeRewriteService, 
+                                IResumeRewriteService resumeRewriteService,
+                                ICoverLetterService coverLetterService, 
                                 ILogger<PipelineOrchestrator> logger)
     {
         _skillExtractionService = skillExtractionService;
         _resumeMatchService = resumeMatchService;
         _resumeRewriteService = resumeRewriteService;
+        _coverLetterService = coverLetterService;
         _logger = logger;
     }
 
@@ -36,7 +39,8 @@ public class PipelineOrchestrator: IPipelineOrchestrator
             result.SkillExtraction.RequiredSkills.Count);
 
         //Step 2: Resume Match
-        result.ResumeMatch = await _resumeMatchService.MatchAsync(result.SkillExtraction, 
+        result.ResumeMatch = await _resumeMatchService.MatchAsync(
+                                    result.SkillExtraction, 
                                     request.ResumeText, cancellationToken);
         
 
@@ -45,14 +49,23 @@ public class PipelineOrchestrator: IPipelineOrchestrator
             result.ResumeMatch.MissingSkills.Count);
 
         //Step 3: Resume Rewriting
-        result.ResumeRewrite = await _resumeRewriteService.RewriteAsync(result.SkillExtraction,
+        result.ResumeRewrite = await _resumeRewriteService.RewriteAsync(
+                                        result.SkillExtraction,
                                         request.ResumeText,
                                         cancellationToken);
         
         _logger.LogInformation("Step 3 complete. Rewritten bullets: {Count}",
             result.ResumeRewrite.RewrittenBullets.Count);
 
-        // Step 4 will be added here
+        //Step 4: Cover Letter Generation
+        result.CoverLetter = await _coverLetterService.GenerateCoverLetterAsync(
+                                        result.SkillExtraction,
+                                        result.ResumeMatch, 
+                                        request.ResumeText,
+                                        cancellationToken);
+
+        _logger.LogInformation("Step 4 complete. Cover letter length: {Length} chars",
+            result.CoverLetter.CoverLetter.Length);
 
         _logger.LogInformation("Pipeline complete");
 
