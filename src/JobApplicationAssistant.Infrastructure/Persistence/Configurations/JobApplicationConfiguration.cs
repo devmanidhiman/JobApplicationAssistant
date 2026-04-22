@@ -10,10 +10,10 @@ public class JobApplicationConfiguration : IEntityTypeConfiguration<JobApplicati
     {
         builder.ToTable("job_applications");
         builder.HasKey(e => e.Id);
-        builder.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
-        builder.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
-        builder.Property(e => e.JobDescription).IsRequired();
-        builder.Property(e => e.ResumeText).IsRequired();
-        builder.Property(e => e.Status).IsRequired().HasDefaultValue("completed");
+        builder.Property(e => e.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+        builder.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
+        builder.Property(e => e.JobDescription).HasColumnName("job_description").IsRequired();
+        builder.Property(e => e.ResumeText).HasColumnName("resume_text").IsRequired();
+        builder.Property(e => e.Status).HasColumnName("status").IsRequired().HasDefaultValue("completed");
     }
 }
