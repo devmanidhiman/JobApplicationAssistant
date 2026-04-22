@@ -1,8 +1,7 @@
-using System;
-using System.Data.Common;
 using System.Text.Json;
 using JobApplicationAssistant.Core.Interfaces;
 using JobApplicationAssistant.Core.Models.Pipeline;
+using JobApplicationAssistant.Core.Models.Responses;
 using JobApplicationAssistant.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -105,5 +104,49 @@ public class JobApplicationRepository : IJobApplicationRepository
         await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Pipeline status updated to '{Status}' for JobApplicationId: {Id}", status, jobApplicationId);
+    }
+
+    public async Task<List<JobApplicationSummary>> GetAllAsync (CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Retrieving all job applications");
+
+        return await _context.JobApplications
+            .OrderByDescending(j => j.CreatedAt)
+            .Select(j => new JobApplicationSummary
+            {
+                Id = j.Id,
+                Status = j.Status,
+                CreatedAt = j.CreatedAt,
+                JobDescription = j.JobDescription
+            }).ToListAsync();
+    }
+
+    public async Task<JobApplicationDetail?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Retrieving Job application by Id: {Id}", id);
+
+        var jobApplication = await _context.JobApplications
+            .FirstOrDefaultAsync(j => j.Id == id);
+
+        if (jobApplication is null)
+        {
+            return null;
+        }
+
+        var pipelineResult = await _context.PipelineResults
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+        
+        return new JobApplicationDetail
+        {
+            Id = jobApplication.Id,
+            Status = jobApplication.Status,
+            CreatedAt = jobApplication.CreatedAt,
+            JobDescription = jobApplication.JobDescription,
+            ResumeText = jobApplication.ResumeText,
+            SkillExtraction = pipelineResult is null ? null : JsonSerializer.Deserialize<SkillExtractionResult>(pipelineResult.SkillExtraction),
+            ResumeMatch = pipelineResult is null ? null : JsonSerializer.Deserialize<ResumeMatchResult>(pipelineResult.ResumeMatch),
+            ResumeRewrite = pipelineResult is null ? null : JsonSerializer.Deserialize<ResumeRewriteResult>(pipelineResult.ResumeRewrite),
+            CoverLetter = pipelineResult is null ? null : JsonSerializer.Deserialize<CoverLetterResult>(pipelineResult.CoverLetter)
+        };
     }
 }
