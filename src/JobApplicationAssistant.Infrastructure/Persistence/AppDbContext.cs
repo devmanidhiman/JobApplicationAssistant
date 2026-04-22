@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
 
     public DbSet<JobApplicationEntity> JobApplications => Set<JobApplicationEntity>();
     public DbSet<PipelineResultEntity> PipelineResults => Set<PipelineResultEntity>();
+    public DbSet<PipelineErrorEntity> PipelineErrors => Set<PipelineErrorEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
