@@ -4,7 +4,9 @@ using JobApplicationAssistant.Core;
 using JobApplicationAssistant.Core.Interfaces;
 using JobApplicationAssistant.Core.Models.Pipeline;
 using JobApplicationAssistant.Infrastructure.Claude;
+using JobApplicationAssistant.Infrastructure.Persistence;
 using JobApplicationAssistant.Infrastructure.Pipeline;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 
@@ -33,12 +35,15 @@ builder.Services.AddSingleton<AnthropicClient>(_ =>
 });
 
 // Register our abstraction
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IClaudeService, ClaudeService>();
 builder.Services.AddScoped<ISkillExtractionService, SkillExtractionService>();
 builder.Services.AddScoped<IResumeMatchService, ResumeMatchService>();
 builder.Services.AddScoped<IResumeRewriteService, ResumeRewriteService>();
 builder.Services.AddScoped<ICoverLetterService, CoverLetterService>();
 builder.Services.AddScoped<IPipelineOrchestrator, PipelineOrchestrator>();
+builder.Services.AddScoped<IJobApplicationRepository, JobApplicationRepository>();
 
 builder.Host.UseSerilog();
 var app = builder.Build();

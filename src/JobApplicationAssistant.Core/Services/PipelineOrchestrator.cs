@@ -1,4 +1,5 @@
 using System;
+using System.Xml;
 using JobApplicationAssistant.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -11,17 +12,20 @@ public class PipelineOrchestrator: IPipelineOrchestrator
     private readonly IResumeMatchService _resumeMatchService;
     private readonly IResumeRewriteService _resumeRewriteService;
     private readonly ICoverLetterService _coverLetterService;
+    private readonly IJobApplicationRepository _jobApplicationRepository;
 
     public PipelineOrchestrator (ISkillExtractionService skillExtractionService, 
                                 IResumeMatchService resumeMatchService,
                                 IResumeRewriteService resumeRewriteService,
                                 ICoverLetterService coverLetterService, 
+                                IJobApplicationRepository jobApplicationRepository,
                                 ILogger<PipelineOrchestrator> logger)
     {
         _skillExtractionService = skillExtractionService;
         _resumeMatchService = resumeMatchService;
         _resumeRewriteService = resumeRewriteService;
         _coverLetterService = coverLetterService;
+        _jobApplicationRepository = jobApplicationRepository;
         _logger = logger;
     }
 
@@ -68,6 +72,8 @@ public class PipelineOrchestrator: IPipelineOrchestrator
             result.CoverLetter.CoverLetter.Length);
 
         _logger.LogInformation("Pipeline complete");
+
+        await _jobApplicationRepository.SavePipelineRunAsync(request, result, cancellationToken);
 
         return result;
     }
