@@ -75,7 +75,7 @@ public class PipelineOrchestrator: IPipelineOrchestrator
             _logger.LogInformation("Step 4 complete. Cover letter length: {Length} chars",
                 result.CoverLetter.CoverLetter.Length);
 
-            await _repository.SavePipelineRunAsync(request, result, cancellationToken);
+            await _repository.SavePipelineRunAsync(jobApplicationId, result, cancellationToken);
             await _repository.UpdatePipelineStatusAsync(jobApplicationId, "completed", cancellationToken);
 
             _logger.LogInformation("Pipeline complete");

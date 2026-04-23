@@ -19,23 +19,15 @@ public class JobApplicationRepository : IJobApplicationRepository
         _logger = logger;
     }
 
-    public async Task SavePipelineRunAsync (PipelineRequest request, PipelineResult result, 
+    public async Task SavePipelineRunAsync (Guid jobApplicationId, PipelineResult result, 
                                             CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Saving Pipeline run to database.");
-        var jobApplication = new JobApplicationEntity
-        {
-            Id = Guid.NewGuid(),
-            JobDescription = request.JobDescription,
-            ResumeText = request.ResumeText,
-            Status = "Completed",
-            CreatedAt = DateTime.UtcNow  
-        };
 
         var pipelineResult = new PipelineResultEntity
         {
             Id = Guid.NewGuid(),
-            JobApplicationId = jobApplication.Id,
+            JobApplicationId = jobApplicationId,
             SkillExtraction = JsonSerializer.Serialize(result.SkillExtraction),
             ResumeMatch = JsonSerializer.Serialize(result.ResumeMatch),
             ResumeRewrite = JsonSerializer.Serialize(result.ResumeRewrite),
@@ -43,11 +35,10 @@ public class JobApplicationRepository : IJobApplicationRepository
             CreatedAt = DateTime.UtcNow  
         };
 
-        await _context.JobApplications.AddAsync(jobApplication, cancellationToken);
         await _context.PipelineResults.AddAsync(pipelineResult, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("Pipeline run saved. JobApplicationId: {Id}", jobApplication.Id);
+        _logger.LogInformation("Pipeline run saved. JobApplicationId: {Id}", jobApplicationId);
 
     }
 
@@ -134,7 +125,11 @@ public class JobApplicationRepository : IJobApplicationRepository
         }
 
         var pipelineResult = await _context.PipelineResults
-            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(p => p.JobApplicationId == id, cancellationToken);
+
+        _logger.LogInformation("PipelineResult found: {Found} for JobApplicationId: {Id}", pipelineResult is not null, id);
+
+        var options = new JsonSerializerOptions {PropertyNameCaseInsensitive = true};
         
         return new JobApplicationDetail
         {
@@ -143,10 +138,10 @@ public class JobApplicationRepository : IJobApplicationRepository
             CreatedAt = jobApplication.CreatedAt,
             JobDescription = jobApplication.JobDescription,
             ResumeText = jobApplication.ResumeText,
-            SkillExtraction = pipelineResult is null ? null : JsonSerializer.Deserialize<SkillExtractionResult>(pipelineResult.SkillExtraction),
-            ResumeMatch = pipelineResult is null ? null : JsonSerializer.Deserialize<ResumeMatchResult>(pipelineResult.ResumeMatch),
-            ResumeRewrite = pipelineResult is null ? null : JsonSerializer.Deserialize<ResumeRewriteResult>(pipelineResult.ResumeRewrite),
-            CoverLetter = pipelineResult is null ? null : JsonSerializer.Deserialize<CoverLetterResult>(pipelineResult.CoverLetter)
+            SkillExtraction = pipelineResult is null ? null : JsonSerializer.Deserialize<SkillExtractionResult>(pipelineResult.SkillExtraction, options),
+            ResumeMatch = pipelineResult is null ? null : JsonSerializer.Deserialize<ResumeMatchResult>(pipelineResult.ResumeMatch, options),
+            ResumeRewrite = pipelineResult is null ? null : JsonSerializer.Deserialize<ResumeRewriteResult>(pipelineResult.ResumeRewrite, options),
+            CoverLetter = pipelineResult is null ? null : JsonSerializer.Deserialize<CoverLetterResult>(pipelineResult.CoverLetter, options)
         };
     }
 }
