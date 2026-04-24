@@ -44,6 +44,15 @@ builder.Services.AddScoped<IResumeRewriteService, ResumeRewriteService>();
 builder.Services.AddScoped<ICoverLetterService, CoverLetterService>();
 builder.Services.AddScoped<IPipelineOrchestrator, PipelineOrchestrator>();
 builder.Services.AddScoped<IJobApplicationRepository, JobApplicationRepository>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendDev", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 builder.Host.UseSerilog();
 var app = builder.Build();
@@ -54,6 +63,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("FrontendDev");
 app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
