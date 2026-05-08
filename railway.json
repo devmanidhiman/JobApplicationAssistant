@@ -5,7 +5,6 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "ASPNETCORE_URLS=http://0.0.0.0:$PORT ./JobApplicationAssistant.API",
     "restartPolicyType": "ON_FAILURE"
   }
 }

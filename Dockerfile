@@ -11,4 +11,4 @@ WORKDIR /app
 
 COPY --from=build /app/out .
 
-ENTRYPOINT ["./JobApplicationAssistant.API"]
+ENTRYPOINT ["sh", "-c", "./JobApplicationAssistant.API"]
