@@ -5,6 +5,6 @@ namespace JobApplicationAssistant.Core;
 
 public interface IPipelineOrchestrator
 {
-    Task<PipelineResult> RunAsync (PipelineRequest request, CancellationToken cancellationToken = default);
+    Task<PipelineResponse> RunAsync (PipelineRequest request, CancellationToken cancellationToken = default);
 
 }

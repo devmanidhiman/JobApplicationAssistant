@@ -29,7 +29,7 @@ public class PipelineOrchestrator: IPipelineOrchestrator
         _logger = logger;
     }
 
-    public async Task<PipelineResult> RunAsync(PipelineRequest request, CancellationToken cancellationToken = default)
+    public async Task<PipelineResponse> RunAsync(PipelineRequest request, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Pipeline started");
 
@@ -99,7 +99,11 @@ public class PipelineOrchestrator: IPipelineOrchestrator
             throw;
         }
 
-        return result;
+        return new PipelineResponse
+        {
+            JobApplicationId = jobApplicationId,
+            Result = result
+        };
     }
 
 }

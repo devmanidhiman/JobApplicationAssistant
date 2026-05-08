@@ -55,3 +55,8 @@ export interface JobApplicationDetail {
   resumeRewrite: ResumeRewriteResult | null
   coverLetter: CoverLetterResult | null
 }
+
+export interface AnalyzeResponse {
+  jobApplicationId: string
+  result: PipelineResult
+}

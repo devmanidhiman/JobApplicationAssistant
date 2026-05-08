@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import type { PipelineResult } from '../types/api'
 import { API_BASE_URL } from '@/config'
+import type { AnalyzeResponse } from '../types/api'
 
 export default function SubmitPage() {
   const [jobDescription, setJobDescription] = useState('')
@@ -29,9 +29,8 @@ export default function SubmitPage() {
 
       if (!response.ok) throw new Error(`Request failed: ${response.status}`)
 
-      const data: PipelineResult = await response.json()
-      console.log(data)
-      navigate('/history')
+      const data: AnalyzeResponse = await response.json()
+      navigate(`/history/${data.jobApplicationId}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.')
     } finally {
