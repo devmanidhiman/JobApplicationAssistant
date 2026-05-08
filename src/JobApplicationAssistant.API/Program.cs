@@ -48,7 +48,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendDev", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(
+            "http://localhost:5173",
+            "https://zealous-sparkle-production.up.railway.app")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
