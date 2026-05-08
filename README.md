@@ -1,6 +1,8 @@
 # Job Application Assistant
 
-An AI-powered job application agent built with **ASP.NET Core**, **Claude API (Anthropic)**, and **PostgreSQL**. Designed as a portfolio project to explore AI agent architecture while solving a real-world problem: tailoring job applications at scale.
+An AI-powered job application agent built with **ASP.NET Core**, **Claude API (Anthropic)**, **PostgreSQL**, and a **React + TypeScript** frontend. Designed as a portfolio project to explore AI agent architecture while solving a real-world problem: tailoring job applications at scale.
+
+🔗 **Live Demo:** [zealous-sparkle-production.up.railway.app](https://zealous-sparkle-production.up.railway.app)
 
 ---
 
@@ -26,6 +28,14 @@ The project follows a **Clean 3-Layer Architecture**:
 ```
 JobApplicationAssistant/
 │
+├── frontend/                                # React + TypeScript SPA (Vite)
+│   ├── src/
+│   │   ├── pages/                           # SubmitPage, HistoryPage, DetailPage
+│   │   ├── components/                      # Layout, shadcn/ui components
+│   │   ├── types/                           # TypeScript interfaces mirroring API models
+│   │   └── config.ts                        # API base URL (env-driven)
+│   └── railway.json                         # Frontend Railway deployment config
+│
 ├── JobApplicationAssistant.API/             # Entry point — Controllers, DI wiring, Swagger
 │   ├── Controllers/
 │   │   └── JobApplicationController.cs
@@ -40,7 +50,7 @@ JobApplicationAssistant/
 │   │   ├── ICoverLetterService.cs
 │   │   └── IJobApplicationRepository.cs
 │   ├── Models/
-│   │   ├── Pipeline/                        # PipelineRequest, PipelineResult, step result models
+│   │   ├── Pipeline/                        # PipelineRequest, PipelineResult, PipelineResponse, step result models
 │   │   └── Responses/                       # JobApplicationSummary, JobApplicationDetail
 │   └── Pipeline/
 │       └── PipelineOrchestrator.cs
@@ -77,9 +87,13 @@ JobApplicationAssistant/
 | Backend framework | ASP.NET Core Web API (.NET 9) |
 | AI brain | Anthropic Claude API (official .NET SDK) |
 | ORM | Entity Framework Core 9.0.4 + Npgsql |
-| Database | PostgreSQL 18 |
+| Database | PostgreSQL |
 | Logging | Serilog (file + console) |
 | API exploration | Swagger UI (Swashbuckle) |
+| Frontend framework | React 19 + TypeScript (Vite) |
+| Styling | Tailwind CSS + shadcn/ui |
+| Routing | React Router v7 |
+| Hosting | Railway (API + DB + Frontend) |
 
 ---
 
@@ -102,7 +116,8 @@ Pipeline status flow: `processing` → `completed` or `failed`
 ### Prerequisites
 
 - [.NET 9 SDK](https://dotnet.microsoft.com/download)
-- [PostgreSQL 18](https://www.postgresql.org/download/windows/)
+- [PostgreSQL](https://www.postgresql.org/download/windows/)
+- [Node.js 22+](https://nodejs.org/)
 - An [Anthropic API key](https://console.anthropic.com/)
 
 ### 1. Clone the repo
@@ -144,14 +159,9 @@ $env:ANTHROPIC_API_KEY = "sk-ant-your-key-here"
 
 > If set in System Environment Variables, fully restart Visual Studio or VS Code for the value to be picked up.
 
-### 5. Run migrations
+### 5. Run the API
 
-```powershell
-cd src/JobApplicationAssistant.Infrastructure
-dotnet ef database update --startup-project ../JobApplicationAssistant.API
-```
-
-### 6. Run the API
+Migrations run automatically on startup.
 
 ```powershell
 cd src/JobApplicationAssistant.API
@@ -159,6 +169,27 @@ dotnet run
 ```
 
 Navigate to `http://localhost:{port}/swagger` to explore the API.
+
+### 6. Run the frontend
+
+```powershell
+cd frontend
+```
+
+Create a `.env.local` file:
+
+```
+VITE_API_BASE_URL=http://localhost:{your-api-port}
+```
+
+Then:
+
+```powershell
+npm install
+npm run dev
+```
+
+Navigate to `http://localhost:5173`.
 
 ---
 
@@ -179,33 +210,12 @@ Runs the full 4-step pipeline and persists the result.
 **Response:**
 ```json
 {
-  "skillExtraction": {
-    "jobTitle": "Senior .NET Developer",
-    "seniorityLevel": "Senior",
-    "requiredSkills": ["C#", "ASP.NET Core", "PostgreSQL"],
-    "niceToHaveSkills": ["Azure", "Docker"],
-    "keywords": [".NET", "backend", "API"]
-  },
-  "resumeMatch": {
-    "matchScore": 82,
-    "matchedSkills": ["C#", "ASP.NET Core"],
-    "missingSkills": ["CI/CD pipelines"],
-    "partialMatches": ["Docker"],
-    "summary": "Strong match..."
-  },
-  "resumeRewrite": {
-    "rewrittenBullets": [
-      {
-        "original": "Built REST APIs for e-commerce platforms.",
-        "rewritten": "Designed and maintained production-grade RESTful APIs...",
-        "reasoning": "Mirrored JD language..."
-      }
-    ],
-    "summary": "Rewrite strategy..."
-  },
-  "coverLetter": {
-    "coverLetter": "Dear Hiring Manager...",
-    "strategy": "Led with strongest matched skills..."
+  "jobApplicationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "result": {
+    "skillExtraction": { ... },
+    "resumeMatch": { ... },
+    "resumeRewrite": { ... },
+    "coverLetter": { ... }
   }
 }
 ```
@@ -227,15 +237,16 @@ Simple Claude connectivity check.
 ## Roadmap
 
 ```
-v1 — Automated 4-step pipeline              ✅ Complete
-     PostgreSQL persistence                  ✅ Complete
-     Retrieval endpoints                     ✅ Complete
-     Error persistence & status tracking     ✅ Complete
+v1 — Automated 4-step pipeline                  ✅ Complete
+     PostgreSQL persistence                      ✅ Complete
+     Retrieval endpoints                         ✅ Complete
+     Error persistence & status tracking         ✅ Complete
+     React + TypeScript frontend                 ✅ Complete
+     Railway deployment (API + DB + Frontend)    ✅ Complete
 
-v2 — Simple frontend UI                     🔲 In progress
-     Conversational pre-pipeline clarification  🔲 Planned
+v2 — Conversational pre-pipeline clarification  🔲 Planned
 
-v3 — Full chat-based refinement loop        🔲 Planned
+v3 — Full chat-based refinement loop            🔲 Planned
      (user can iteratively refine resume & cover letter)
 ```
 
@@ -253,7 +264,11 @@ v3 — Full chat-based refinement loop        🔲 Planned
 
 **DI lifetimes** — `AnthropicClient` is `Singleton` (one instance for the app lifetime). All services and the repository are `Scoped` (one instance per request, sharing the same `DbContext`).
 
+**Migrations on startup** — `db.Database.Migrate()` runs at application startup. EF Core tracks applied migrations in `__EFMigrationsHistory` so this is idempotent — it only runs pending migrations, making it safe for containerized deployments where shell access isn't available.
+
 **Environment variables on Windows** — `builder.Configuration["ANTHROPIC_API_KEY"]` is used instead of `Environment.GetEnvironmentVariable()` because .NET's `IConfiguration` correctly picks up the process environment across platforms and IDE restarts.
+
+**CORS** — The API explicitly allows requests from both `http://localhost:5173` (local dev) and the Railway frontend domain. Since the frontend and API are on different origins, this is required for browser fetch requests to succeed.
 
 ---
 
